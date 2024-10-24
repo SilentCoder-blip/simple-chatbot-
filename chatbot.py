@@ -1,41 +1,35 @@
 import streamlit as st
-import openai
+from transformers import pipeline
 
-# Set your OpenAI API key
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+# Load the Hugging Face pipeline
+@st.cache_resource
+def load_model():
+    # Using GPT-Neo for text generation
+    return pipeline("text-generation", model="EleutherAI/gpt-neo-1.3B")
 
-# Function to get AI response from OpenAI API
-def get_ai_response(prompt):
-    try:
-        response = openai.Completion.create(
-            engine="text-davinci-003",  # You can switch to 'gpt-3.5-turbo' or 'gpt-4'
-            prompt=prompt,
-            max_tokens=150,
-            temperature=0.7,
-        )
-        return response.choices[0].text.strip()
-    except Exception as e:
-        return f"Error: {str(e)}"
+# Function to generate AI responses
+def generate_response(prompt, model):
+    response = model(prompt, max_length=300, do_sample=True, temperature=0.7)
+    return response[0]["generated_text"]
 
-# Streamlit app layout
-st.title("AI Question Answering Chatbot")
-st.write("Ask me anything about Artificial Intelligence!")
+# Streamlit UI
+def main():
+    st.title("AI Chatbot - Ask Anything About Artificial Intelligence")
+    st.write("This chatbot uses a GPT-Neo model to answer questions about Artificial Intelligence.")
+    
+    # Text input for the user question
+    user_input = st.text_input("Ask your AI-related question here:")
+    
+    if user_input:
+        # Load the model
+        model = load_model()
+        
+        # Generate the response
+        with st.spinner('Thinking...'):
+            ai_response = generate_response(user_input, model)
+        
+        # Display the response
+        st.write(ai_response)
 
-# Text input for user's question
-user_input = st.text_input("Your Question:")
-
-# When the user submits a question
-if user_input:
-    with st.spinner("Thinking..."):
-        ai_response = get_ai_response(user_input)
-    st.write("### Answer:")
-    st.write(ai_response)
-
-# Information section about the bot
-st.sidebar.title("About this chatbot")
-st.sidebar.info(
-    """
-    This chatbot is powered by OpenAI's GPT-3 model and can answer questions related to Artificial Intelligence. 
-    Ask me about AI concepts, algorithms, or applications.
-    """
-)
+if __name__ == "__main__":
+    main()
