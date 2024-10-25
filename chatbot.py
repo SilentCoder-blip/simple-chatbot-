@@ -1,6 +1,6 @@
 import streamlit as st
 import random
-import torch as m  # Renaming torch to m
+#import torch as m  # Renaming torch to m
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from gtts import gTTS
 import os
