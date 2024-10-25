@@ -1,10 +1,9 @@
 import streamlit as st
 import random
-import torch
+import torch as m  # Renaming torch to m
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from gtts import gTTS
 import os
-from IPython.display import Audio
 
 # Load the pre-trained model and tokenizer from Hugging Face
 model_name = "microsoft/DialoGPT-small"  # Choose a suitable conversational model
@@ -24,7 +23,7 @@ def get_response(user_input, chat_history_ids):
     new_user_input_ids = tokenizer.encode(user_input + tokenizer.eos_token, return_tensors='pt')
 
     # Append the new user input tokens to the chat history
-    bot_input_ids = torch.cat([chat_history_ids, new_user_input_ids], dim=-1) if chat_history_ids.numel() > 0 else new_user_input_ids
+    bot_input_ids = m.cat([chat_history_ids, new_user_input_ids], dim=-1) if chat_history_ids.numel() > 0 else new_user_input_ids
 
     # Generate a response from the model
     chat_history_ids = model.generate(bot_input_ids, max_length=1000, pad_token_id=tokenizer.eos_token_id)
@@ -34,7 +33,7 @@ def get_response(user_input, chat_history_ids):
     return response, chat_history_ids
 
 # Initialize chat history
-chat_history_ids = torch.tensor([]).reshape(0, 0)
+chat_history_ids = m.tensor([]).reshape(0, 0)
 
 # Streamlit UI setup
 st.title("AI Chatbot")
